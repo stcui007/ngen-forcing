@@ -15,3 +15,7 @@ dependencies:
   - osgeo
   - exactextract
   - numpy
+  - ssl
+  - wget
+  - pathlib
+  - os

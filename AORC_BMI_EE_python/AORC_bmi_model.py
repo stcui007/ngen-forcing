@@ -1,7 +1,7 @@
 # Need these for BMI
 # This is needed for get_var_bytes
 from pathlib import Path
-
+from os.path import join
 # import data_tools
 # Basic utilities
 import numpy as np
@@ -30,6 +30,7 @@ class AORC_bmi_model(Bmi):
         self._end_time = np.finfo(float).max
         self._model = None
         self.var_array_lengths = 1
+        self.arr_index = 0    #This is my addition
         #self._aorc_beg = ""        
         #self._aorc_end = ""
         #self._aorc_new_end = ""
@@ -179,8 +180,12 @@ class AORC_bmi_model(Bmi):
         # remove netcdf file from directory
         os.remove(self._aorc_beg + self._date.strftime('%Y') + self._date.strftime('%m') + self._date.strftime('%d') + self._date.strftime('%H') + self._aorc_end)
 
-        # Get the number of catchments for hydrofabric file and pathway to file
-        self._hyfabfile = self.cfg_bmi['hyfabfile']
+        # Need to reproject the hydrofabric crs to the meteorological forcing
+        # dataset crs for ExactExtract to properly regrid the data
+        self._hyfabfile = join(os.getcwd(),"hyfabfile_final.json")
+        hyfab_data = gpd.read_file(self.cfg_bmi['hyfabfile'],layer='divides')
+        hyfab_data = hyfab_data.to_crs('WGS84')
+        hyfab_data.to_file(self._hyfabfile,driver="GeoJSON")
 
         # Open the hydrofabric file to get the number of catchments in NextGen to initalize arrays
         cat_df_full = gpd.read_file(self._hyfabfile)
@@ -192,14 +197,14 @@ class AORC_bmi_model(Bmi):
             self._values[self._var_name_map_short_first[parm]] = self.cfg_bmi[parm]
         for model_input in self.get_input_var_names():
             if model_output == "ids":
-                self._values[model_output] = np.empty(self.var_array_lengths, dtype="S16")
+                self._values[model_output] = np.empty(self.var_array_lengths, dtype=object)
             else:
                 self._values[model_output] = np.zeros(self.var_array_lengths, dtype=float)
         #for model_input in self._input_var_types:
         #    self._values[model_input] = np.zeros(self.var_array_lengths, dtype=self._input_var_types[model_input])
         for model_output in self.get_output_var_names():
             if model_output == "ids":
-                self._values[model_output] = np.empty(self.var_array_lengths, dtype="S16")
+                self._values[model_output] = np.empty(self.var_array_lengths, dtype=object)
             else:
                 self._values[model_output] = np.zeros(self.var_array_lengths, dtype=float)
         #print(self._values)
@@ -210,8 +215,12 @@ class AORC_bmi_model(Bmi):
         # ------------- Set time step size -----------------------#
         self._values['time_step_size'] = self.cfg_bmi['time_step_seconds']
 
+        # ------------- Set catchment id -----------------------#
+        self._values['cat_id'] = self.cfg_bmi['cat_id']
+        #print("cat_id:", self.cfg_bmi['cat_id'])
+        #print("self._values[cat_id]:", self._values['cat_id'])
+
         # ------------- Initialize a model ------------------------------#
-        #self._model = ngen_model(self._values.keys())
         self._model = ngen_AORC_model()
 
     #------------------------------------------------------------ 
@@ -237,6 +246,10 @@ class AORC_bmi_model(Bmi):
     #------------------------------------------------------------    
     def finalize( self ):
         """Finalize model."""
+        # Remove generated hydrofabric file that
+        # was configured for the forcings crs
+        os.remove(self._hyfabfile)
+
         self._model = None
 
     #-------------------------------------------------------------------
@@ -308,8 +321,21 @@ class AORC_bmi_model(Bmi):
         array_like
             Value array.
         """
-        
-        return self._values[var_name]
+
+        if var_name == "ids":
+            array = np.array(self._values['ids'])
+            if np.all(array != None):
+                arr_index = np.where(array == self._values['cat_id'])
+                arr_idx = (arr_index[0])[0]
+                self.arr_index = arr_idx
+                #print("self._values['ids'] 1: ", self._values['ids'])
+
+        if var_name == "ids":
+            self._values['ids'] = self._values['cat_id']
+            return self._values[var_name]
+        else:
+            #return (self._values[var_name])[200]
+            return (self._values[var_name])[self.arr_index]
 
     #-------------------------------------------------------------------
     #-------------------------------------------------------------------
@@ -402,6 +428,7 @@ class AORC_bmi_model(Bmi):
               Array of new values.
         """ 
         self._values[var_name][:] = values
+        print("In set_value: length of values = ", len(values))
 
     #------------------------------------------------------------ 
     def set_value_at_indices(self, var_name: str, indices: np.ndarray, src: np.ndarray):

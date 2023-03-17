@@ -20,7 +20,8 @@ def execute():
     print('Now loop through the time steps, run the AORC forcings model (update), and set output values')
     print('\n')
     print('model time', 'ids', 'RAINRATE', 'T2D', 'Q2D', 'U2D', 'V2D', 'PSFC', 'SWDOWN', 'LWDOWN')
-    for x in range(10):
+
+    for x in range(5):
 
         #########################################
         # UPDATE THE MODEL WITH THE NEW INPUTS ##
@@ -39,7 +40,9 @@ def execute():
         #                                                         model.get_value_ptr('SWDOWN'),
         #                                                         model.get_value_ptr('LWDOWN')))
 
-        print(model.get_current_time(),model.get_value_ptr('ids')[100],model.get_value_ptr('APCP_surface')[100],model.get_value_ptr('TMP_2maboveground')[100],model.get_value_ptr('SPFH_2maboveground')[100],model.get_value_ptr('UGRD_10maboveground')[100],model.get_value_ptr('VGRD_10maboveground')[100],model.get_value_ptr('PRES_surface')[100],model.get_value_ptr('DSWRF_surface')[100],model.get_value_ptr('DLWRF_surface')[100])
+        #print(model.get_current_time(),model.get_value_ptr('ids'),model.get_value_ptr('APCP_surface')[0],model.get_value_ptr('TMP_2maboveground')[0],model.get_value_ptr('SPFH_2maboveground')[0],model.get_value_ptr('UGRD_10maboveground')[0],model.get_value_ptr('VGRD_10maboveground')[0],model.get_value_ptr('PRES_surface')[0],model.get_value_ptr('DSWRF_surface')[0],model.get_value_ptr('DLWRF_surface')[0])
+
+        print(model.get_current_time(),model.get_value_ptr('ids'),model.get_value_ptr('APCP_surface'),model.get_value_ptr('TMP_2maboveground'),model.get_value_ptr('SPFH_2maboveground'),model.get_value_ptr('UGRD_10maboveground'),model.get_value_ptr('VGRD_10maboveground'),model.get_value_ptr('PRES_surface'),model.get_value_ptr('DSWRF_surface'),model.get_value_ptr('DLWRF_surface'))
 
 
     # Finalizing the BMI
