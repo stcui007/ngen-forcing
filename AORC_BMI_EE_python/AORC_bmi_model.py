@@ -322,13 +322,15 @@ class AORC_bmi_model(Bmi):
             Value array.
         """
 
-        if var_name == "ids":
-            array = np.array(self._values['ids'])
-            if np.all(array != None):
-                arr_index = np.where(array == self._values['cat_id'])
-                arr_idx = (arr_index[0])[0]
-                self.arr_index = arr_idx
-                #print("self._values['ids'] 1: ", self._values['ids'])
+        #Run once in the first time step
+        if self.get_current_time() == self.get_time_step():
+            if var_name == "ids":
+                array = np.array(self._values['ids'])
+                if np.all(array != None):
+                    arr_index = np.where(array == self._values['cat_id'])
+                    arr_idx = (arr_index[0])[0]
+                    self.arr_index = arr_idx
+                    #print("self._values['ids'] 1: ", self._values['ids'])
 
         if var_name == "ids":
             self._values['ids'] = self._values['cat_id']
