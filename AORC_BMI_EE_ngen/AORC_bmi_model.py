@@ -197,10 +197,10 @@ class AORC_bmi_model(Bmi):
         for parm in self._model_parameters_list:
             self._values[self._var_name_map_short_first[parm]] = self.cfg_bmi[parm]
         for model_input in self.get_input_var_names():
-            if model_output == "ids":
-                self._values[model_output] = np.empty(self.var_array_lengths, dtype=object)
+            if model_input == "ids":
+                self._values[model_input] = np.empty(self.var_array_lengths, dtype=object)
             else:
-                self._values[model_output] = np.zeros(self.var_array_lengths, dtype=float)
+                self._values[model_input] = np.zeros(self.var_array_lengths, dtype=float)
         for model_output in self.get_output_var_names():
             if model_output == "ids":
                 self._values[model_output] = np.empty(self.var_array_lengths, dtype=object)

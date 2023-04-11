@@ -16,6 +16,8 @@ This is an implementation of a Python-based model that fulfills the Python langu
 
 ## Run the model
 `python run_ngen_aorc_bmi.py`
+Note that to run the model correctly, we assume all the python codes here reside in a top directory in "ngen/"
+We also assume there is a forcing file in data/forcing/ containing "time" column only
 
 ## Outputs
 Outputs are in files the same as in ngen framework.
